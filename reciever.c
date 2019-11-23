@@ -68,7 +68,10 @@ int main(void) {
 			nokia_lcd_write_string(humidityString, 1);
 			nokia_lcd_set_cursor(0, 20);
 			nokia_lcd_write_string(temperatureString, 1);
-			nokia_lcd_render(); 
+			sprintf(countBuffer, "%d", countRecieve);
+			nokia_lcd_set_cursor(0, 30);
+			nokia_lcd_write_string(countBuffer, 1);
+			nokia_lcd_render();
 			
 			//Turn on fan if it's too hot (using humidity because varying temperature is too hard)
 			if (humidity_int > 65)
