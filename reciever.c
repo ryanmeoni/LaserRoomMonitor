@@ -1,6 +1,20 @@
+//Ryan Meoni's 122A Final Project. Fall 2019. 
+
+//Library to work the temperature/humidity sensor can be found here: https://github.com/fengcda/DHT_Sensor_AVR_Library
+
+
 #ifndef F_CPU
 #define F_CPU 8000000UL //define microcontroller clock speed
 #endif
+
+//1 - VCC
+//2 - GND
+//3 - SCE
+//4 - RST
+//5 - D/C
+//6 - DN (Mosi)
+//7 - SCLK
+//8 - 037-8
 
 #include <util/delay.h>
 #include "nokia5110.c" //library for my nokia5110 display 
@@ -17,6 +31,8 @@ uint16_t humidity_int = 0;
 int main(void) {
 	DDRB = 0b11111110;
 	PORTB = 0b00000001; 
+	DDRA = 0xFF; 
+	PORTA = 0x00; 
 	
 	//Initializing LCD Display to output data from DHT sensor
 	nokia_lcd_init();
@@ -26,9 +42,11 @@ int main(void) {
 	//Setup fields for temp/humidity 
 	char humidityBuffer[100] = {0}; 
 	char temperatureBuffer[100] = {0};
+	char peopleInRoomBuffer[100] = {0}; 
 	char countBuffer[100] = {0}; 
 	char* humidityPrint = "Humidity: ";
 	char* temperaturePrint = "Temp: ";
+	char* peopleInRoomPrint = "Room Count: ";
 	char* percentString = "%"; 
 	char* celciusString = "C"; 
 	
@@ -42,6 +60,7 @@ int main(void) {
 		//Allocate space for our 2 strings to Nokia LCD
 		char *humidityString = malloc(strlen(humidityPrint) + strlen(humidityBuffer) + strlen(percentString) + 1); // +1 for the null-terminator
 		char *temperatureString = malloc(strlen(temperaturePrint) + strlen(temperatureBuffer) + strlen(celciusString) + 1); // +1 for the null-terminator
+		char *peopleInRoomString = malloc(strlen(peopleInRoomPrint) + strlen(peopleInRoomBuffer) + 1); // +1 for the null-terminator
 		
 		//Update our temp and humidity readings 
 		if (dht_GetTempUtil(&temperature_int, &humidity_int) != -1) 
@@ -74,7 +93,10 @@ int main(void) {
 			nokia_lcd_render();
 			
 			//Turn on fan if it's too hot (using humidity because varying temperature is too hard)
-			if (humidity_int > 65)
+			if (countRecieve) PORTA = 0x01; 
+			else PORTA = 0x00; 
+			
+			if (humidity_int > 65 && countRecieve > 0)
 			{
 				portBval = 0x02; 
 				PORTB = portBval; 
@@ -106,8 +128,12 @@ int main(void) {
 			countRecieve = USART_Receive(0); 
 			USART_Flush(0);
 			sprintf(countBuffer, "%d", countRecieve);
+			
+			//Copy data over to humidity string
+			strcpy(peopleInRoomString, peopleInRoomPrint);
+			strcat(peopleInRoomString, countBuffer);
 			nokia_lcd_set_cursor(0, 30);
-			nokia_lcd_write_string(countBuffer, 1);
+			nokia_lcd_write_string(peopleInRoomString, 1);
 			nokia_lcd_render();
 		}
 		
