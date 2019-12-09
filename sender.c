@@ -1,9 +1,5 @@
-/*
- * rmeon001_Lab2_part1.c
- *
- * Created: 10/4/2019 1:39:40 PM
- * Author : Ryan
- */ 
+//Reciever code for CS 122A Final Project. Fall 2019. 
+
 #include <util/delay.h>
 #include <avr/io.h>
 #include <usart_ATmega1284.h>
